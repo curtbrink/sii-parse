@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  siiparseserver:
+    image: nestjs-docker-build
+    networks:
+      - nestjs-network
+    ports:
+      - '35515:35515'
+networks:
+  nestjs-network:
