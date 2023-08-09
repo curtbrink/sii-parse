@@ -1,29 +1,13 @@
-FROM node:fermium-alpine as dev
-
-WORKDIR /usr/src/app
-COPY package*.json ./
-
+FROM node:18.16.0 as build-stage
+WORKDIR /app
+COPY package*.json .
 RUN npm install
-
-RUN npm install glob rimraf
-
-COPY . .
-
+COPY ./ .
 RUN npm run build
 
-FROM node:fermium-alpine as prod
+FROM nginx as production-stage
+RUN mkdir /app
+COPY --from=build-stage /app/dist /app
+COPY nginx.conf /etc/nginx/nginx.conf
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-
-WORKDIR /usr/src/app
-
-COPY package*.json ./
-
-RUN npm install --production
-
-COPY . .
-
-COPY --from=dev /usr/src/app/dist ./dist
-
-CMD ["node", "dist/main"]
+CMD ["npm", "run", "start:dev"]
